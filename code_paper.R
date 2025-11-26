@@ -487,8 +487,8 @@ ggplot(ays_data %>%
                                             "55µm net vertical"))),
        aes(x = ts_meth, y = log10(abs_abun), fill = ts_meth)) +
   geom_boxplot() +
-  geom_jitter(aes(color = functional_type)) +
-  # scale_color_manual(values = c("#0072B2","#E69F00","#D55E00","#009E73", "firebrick")) +
+  geom_jitter(aes(color = functional_type), alpha = 0.7) +
+  scale_color_manual(values = c("#0072B2","purple","#D55E00","#009E73", "pink")) +
   scale_x_discrete(labels = wrap_labels(
     c("Water grab",
       "20µm net horizontal",
@@ -561,8 +561,8 @@ ggplot(ays_data %>%
                                             "55µm net vertical"))),
        aes(x = ts_meth, y = log10(rela_abun_densi), fill = ts_meth)) +
   geom_boxplot() +
-  geom_jitter(aes(color = functional_type)) +
-  # scale_color_manual(values = c("#0072B2","#E69F00","#D55E00","#009E73","firebrick")) +
+  geom_jitter(aes(color = functional_type), alpha = 0.7) +
+  scale_color_manual(values = c("#0072B2","purple","#D55E00","#009E73","pink")) +
   scale_x_discrete(labels = wrap_labels(
     c("Water grab",
       "20µm net horizontal",
