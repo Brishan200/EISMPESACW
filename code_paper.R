@@ -32,7 +32,11 @@ colorsforgraphs <- c(
   "#8FD9FF", "#BC7F81", "#7AB976", "#B92E0D", "#BBA7B2", "#82FB9B", "#6C6A58", "#8A6300", "#A770B1", "#FE5A73"
 )
 
-#This functions gets genus and species name and is 
+
+
+
+##
+#  phyto data function--------------------------------------------------------------
 lookup_table <- tibble::tibble(
   taxon = c(
     "Amphora", "Asterionellopsis", "Bacillaria", "Bacteriastrum", "Bellerochae", "Biddulphia",
@@ -57,12 +61,12 @@ lookup_table <- tibble::tibble(
     "T.macroceros", "T.candelabrum", "T.pentagonus", "T.platycorne",
     "D.tripos", "Zooplankton", 
     "Gonyaulax","Pyrocystis","Cylindrotheca","Noctiluca","Pseudo-nitzschia","Eupyxidicula",
-    "Probosica", "C.cf_compressus", "D.brightwellii","E.zondicus", "T.frauenfeldii", "A.glacialis",
+    "Probosica", "C.cf.compressus", "D.brightwellii","E.zondicus", "T.frauenfeldii", "A.glacialis",
     "C.contortus", "C.pelagica", "C.protuberans","C.peruvianus","D.pumila","Asteroplanus",
     "P.horologium", "D.lenticula", "G.spirale", "Katodinium", "P.pyriforme",
     "D.norvegica","Pyrophacus", "P.reticulatum", "Actinocyclus","Cryptophaceae", "D.fragilissimus",
     "L.undulatum","Porosira", "C.affinis", "Alexandrium", "A.ostenfeldii","G.undulans",
-    "Dictyocha",
+    "Dictyocha","P.decipiens", "Asteromphalus","Surirella","M.rubrum",
     NA
   ),
   genus = c(
@@ -93,14 +97,14 @@ lookup_table <- tibble::tibble(
     "Pyrophacus", "Diplopsalis", "Gyrodinium", "Katodinium", "Protoperidinium",
     "Dinophysis", "Pyrophacus", "Protoceratium","Actinocyclus", "Cryptophaceae", "Dactyliosolen",
     "Lithodesmium", "Porosira","Chaetoceros", "Alexandrium", "Alexandrium","Gyrodinium",
-    "Dictyocha",
+    "Dictyocha","Protoperidinium","Asteromphalus","Surirella","Mesodinium",
     NA
   ),
   functional_type =c(
     "Diatom", "Diatom", "Diatom", "Diatom", "Diatom", "Diatom",
     "Diatom", "Diatom", "Diatom", "Diatom", "Diatom", "Diatom", "Diatom",
     "Diatom", "Diatom", "Diatom", "Diatom", "Diatom", "Diatom", "Diatom","Diatom",
-    "Diatom", "Diatom", "Diatom", "Diatom", "Zooplankton", "Zooplankton",
+    "Diatom", "Diatom", "Diatom", "Diatom", "Zooplankton", "Ciliate",
     "Diatom", "Zooplankton", "Diatom", "Diatom", "Diatom",
     "Diatom", "Diatom", "Diatom", "Diatom", "Cyst", "Diatom",
     "Diatom", "Dinoflagellate", "Dinoflagellate", "Dinoflagellate", "Diatom", "Diatom", "Diatom",
@@ -124,7 +128,7 @@ lookup_table <- tibble::tibble(
     "Dinoflagellate","Dinoflagellate", "Dinoflagellate", "Dinoflagellate","Dinoflagellate",
     "Dinoflagellate", "Dinoflagellate", "Dinoflagellate", "Diatom","Flagellate","Diatom",
     "Diatom", "Diatom","Diatom","Dinoflagellate","Dinoflagellate","Dinoflagellate",
-    "Silicoflagellate",
+    "Silicoflagellate","Dinoflagellate","Diatom","Diatom","Ciliate",
     NA
   )
 )
@@ -140,59 +144,42 @@ add_taxonomic_info <- function(data, lookup_table) {
 
 
 
+
 ##
 # Importing in microscope  counts ------------------------------
-setwd("C:/Resources/Campus Work/PhD/DATA/BioSCape")
-
 ##Microscope data ##
-phyto_raw <-  read_csv("Phyto-counts/Phyto_abund_BioSCape_microcsope.csv")
+phyto_raw <-  read_csv("data/datacount_phytoplankton-collection-methods-in-three-bays.csv")
 
-#filter for 3 stations in each bay and for the flight day of each bay 
 m_data <- phyto_raw %>% 
-  select(-1) %>% 
-  filter( date_sampled %in% c("2023-10-25","2023-10-31","2023-11-08"),
-    (site == "SHB" & station %in% c("St2", "St3", "St4")) |
-      (site == "WB" & station %in% c("St2", "St3", "St4")) |
-      (site == "AB" & station %in% c("St1", "St2", "St3"))) %>% 
-  mutate(station = case_when(
-    site %in% c("SHB", "WB") & station == "St2" ~ "1",
-    site %in% c("SHB", "WB") & station == "St3" ~ "2",
-    site %in% c("SHB", "WB") & station == "St4" ~ "3",
-    site == "AB" & station == "St1" ~ "1",
-    site == "AB" & station == "St2" ~ "2",
-    site == "AB" & station == "St3" ~ "3"
-  ))
-
-unique(m_data$tow_size)
-unique(m_data$tow_type)
-unique(m_data$site)
-unique(m_data$station)
-unique(m_data$date_sampled)
-
-
-sites <- data.frame(
-  site = c("AB", "AB", "AB", "SHB", "SHB", "SHB", "WB", "WB", "WB"),
-  station = c("1", "2", "3", "1", "2", "3", "1", "2", "3"),
-  lat = c(-33.895833, -33.825833, -33.767778, -32.71255, -32.68301, -32.65564, -34.537778, -34.515556, -34.493611),
-  lon = c(25.704167, 25.754167, 25.905833, 18.10277, 18.08783, 18.07399, 19.318611, 19.309167, 19.3)
-)
-
-m_data <- m_data %>% left_join(sites)
-
-m_data <-  m_data %>% 
+  group_by(site,station,date_sampled, tow_size,tow_type,taxon) %>% 
+  ###For the calculation it is reported as cells per liter
+  reframe(abs_abun = case_when(
+    tow_type == "U" ~ ((total_cells  * area_chamber) / area_counted * (vol_collected/sample_vol)),
+    tow_type == "H" ~ ((total_cells * sample_vol * area_chamber) / area_counted * (vol_collected)) / dilution,
+    tow_type == "V" ~ ((total_cells * sample_vol * area_chamber) / area_counted * (vol_collected)) / dilution)
+  ) %>% 
+  left_join(phyto_raw %>% 
+              select(date_sampled,site, station, tow_size, tow_type, taxon, total_cells), 
+            by = join_by("date_sampled","site", "station", "tow_size", "tow_type","taxon")) %>% 
+  mutate(method = "microscope") %>% 
   mutate(taxon = case_when(
+    taxon == "S.turris" ~ "E.turris",
+    taxon == "Pseudo-nitzschia" ~ "P.nitzschia",
+    taxon == "L.polyhedra" ~ "G.polyedra",
+    taxon == "G.polyhedra" ~ "G.polyedra",
+    taxon == "C.cf_compressus" ~ "C.cf.compressus",
     taxon == "Noctiluca" ~ "N.scintillans",
     taxon == "Pseudo-nitzschia" ~ "P.nitzschia",
-    taxon == "G.polyhedra" ~ "G.polyedra",
-    taxon == "Ciliates" ~ "Ciliate",
+    taxon == "Ciliates" ~ "M.rubrum",
+    taxon == "Ciliate" ~ "M.rubrum",
     taxon == "Tintinnids" ~ "Tintinnid",
+    taxon == "centric" ~ "centric",
+    taxon == "T.augustus-lineatum" ~ "T.anguste-lineata",
     taxon == "P.depessum" ~ "P.depressum",
     TRUE ~ taxon
   ))
+  
 
-m_data <- add_taxonomic_info(m_data,lookup_table)
-
-str(m_data)
 
 ##
 # Calculation from count to abs_abundance ---------------------------------
@@ -260,7 +247,7 @@ renyidata <- countdata %>%
               values_from = total_cells)
 
 renyidata$S <- specnumber(renyidata[,5:ncol(renyidata)])
-renyidata$ENS <- renyidata(renyidata[,5:ncol(renyidata)], "invsimpson")
+renyidata$ENS <- diversity(renyidata[,5:ncol(renyidata)], "invsimpson")
 summary(renyidata[,c(1:4,109:110)])
 # str(renyidata)
 # renyidata[1:4]
@@ -420,6 +407,7 @@ sankey_data_taxon <- ays_data %>%
   distinct(site, station, tow_size,tow_type,taxon, total_cells,functional_type) %>%
   unite("coll_config", tow_type,tow_size, sep = "_size")
 
+
 # Plot Sankey (alluvial)
 ggplot(sankey_data_taxon,
        aes(axis1 = coll_config, axis2 = site, 
@@ -431,7 +419,7 @@ ggplot(sankey_data_taxon,
             aes(label = after_stat(stratum)),
             data = function(d) {
               d %>%
-                dplyr::mutate(functional_type = ifelse(functional_type %in% c("Flagellate", "Silicoflagellate"), "", functional_type))
+                dplyr::mutate(functional_type = ifelse(functional_type %in% c("Ciliate","Flagellate", "Silicoflagellate"), "", functional_type))
             }) +
   scale_x_discrete(limits = c("Collection method", "Site", "Fucntional group"),
                    expand = c(.05, .05)) +
@@ -449,7 +437,7 @@ ggsave(filename = "plots/Figure 1a.jpg", width = 12, height = 8, dpi = 300)
 
 
 ggplot(sankey_data_taxon %>%  
-         filter(functional_type %in% c("Flagellate", "Silicoflagellate")),
+         filter(functional_type %in% c("Ciliate","Flagellate", "Silicoflagellate")),
        aes(axis1 = coll_config, axis2 = site, 
            axis3 = functional_type,
            y = log1p(total_cells))) +
@@ -485,7 +473,7 @@ ggplot(ays_data %>%
        aes(x = ts_meth, y = log10(abs_abun), fill = ts_meth)) +
   geom_boxplot() +
   geom_jitter(aes(color = functional_type)) +
-  scale_color_manual(values = c("#0072B2","#E69F00","#D55E00","#009E73")) +
+  # scale_color_manual(values = c("#0072B2","#E69F00","#D55E00","#009E73", "firebrick")) +
   scale_x_discrete(labels = wrap_labels(
     c("Water grab",
       "20µm net horizontal",
@@ -559,7 +547,7 @@ ggplot(ays_data %>%
        aes(x = ts_meth, y = log10(rela_abun_densi), fill = ts_meth)) +
   geom_boxplot() +
   geom_jitter(aes(color = functional_type)) +
-  scale_color_manual(values = c("#0072B2","#E69F00","#D55E00","#009E73")) +
+  # scale_color_manual(values = c("#0072B2","#E69F00","#D55E00","#009E73","firebrick")) +
   scale_x_discrete(labels = wrap_labels(
     c("Water grab",
       "20µm net horizontal",
@@ -630,7 +618,7 @@ ggsave(filename = "plots/Figure 2.jpg", width = 12, height = 8, dpi = 300)
 ###
 # Renyi plots --------------------------------------------------
 renyidata <- ays_data %>% 
-  filter(functional_type %in% c("Diatom", "Dinoflagellate", "Flagellate", "Silicoflagellate")) %>%
+  filter(functional_type %in% c("Diatom", "Dinoflagellate", "Flagellate", "Silicoflagellate","Ciliate")) %>%
   select(site,station,tow_size, tow_type,taxon,total_cells) %>% 
   mutate(coll_config = paste(tow_type, tow_size, sep = "_size")) %>% 
   arrange(taxon) %>% 
